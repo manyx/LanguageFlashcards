@@ -1,0 +1,79 @@
+<html>
+<head> 
+    <title>Admin</title>
+	<link rel="StyleSheet" href="/css/my.css" type="text/css">
+    <style>
+
+    </style> 
+  </head> 
+<body>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+<script src="/js/myutil.js"></script>
+<script src="/js/json2.js"></script>
+<script>
+
+$(function () {
+    $('body').ajaxError(function (_, s) {
+        var err = s.responseText
+        var m = err.match(/Exception: (.*)/)
+        if (m) {
+            err = m[1]
+        }
+        alert("error: " + err)
+    })
+
+    function loadUrl(url) {
+        $('#output').html('<iframe class="fill" src="' + url + '">')
+    }
+    function loadUrlText(url) {
+        $.ajax({
+            url : url,
+            success : function (s) {
+                t = $('<textarea class="fill"></textarea>').val(s)
+                $('#output').empty().append(t)
+            },
+        })
+    }
+    var funcs = {
+        "dashboard" : function () {
+            loadUrl("{{dashboard}}")
+        },
+        "datastore_admin" : function () {
+            loadUrl("/_ah/datastore_admin")
+        },
+        "eval" : function () {
+            var inBox = $('<textarea style="width:50%;height:100%;float:left"></textarea>')
+            var button = $('<button>eval</button>')
+            button.click(function () {
+                $.ajax({
+                    method : "POST",
+                    url : "/_api/_eval",
+                    data : { cmd : inBox.val() },
+                    success : function (s) {
+                        outBox.val(s)
+                    }
+                })
+            })
+            var outBox = $('<textarea style="width:50%;height:90%;float:right"></textarea>')
+            $('#output').empty().append(button).append(inBox).append(outBox)
+        }
+    }
+    
+    foreach(funcs, function (func, key) {
+        $('#controls').append($('<button></button>').text(key).click(func))
+        $('#controls').append('<br>')
+    })
+})
+
+</script>
+
+<table class="fill">
+    <tr class="fill">
+        <td valign="top">
+            <div id="controls"></div>
+        </td>
+        <td class="fill" valign="top">
+            <div id="output" class="fill"></div>
+        </td>
+    </tr>
+</table>

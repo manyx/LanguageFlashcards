@@ -1,0 +1,418 @@
+<html>
+<head> 
+    <title>Main</title>
+	<link rel="StyleSheet" href="/css/my.css" type="text/css">
+    <style>
+    
+body {
+  font-family: Sans-Serif;
+}
+
+.playButton {
+    background-color: lightgrey
+}
+
+.playButton:hover {
+    background-color: grey
+}
+
+.username {
+    font-size: small;
+    color: blue;
+    cursor: pointer;
+}
+
+.pencil
+{
+    width:70px;
+    padding: 5px;
+    border:1px solid #123333;
+    cursor:pointer;
+    background-color: lightgrey
+}
+.pencil:hover
+{
+    background-color: grey
+}
+.eraser
+{
+    width:70px;
+   padding: 5px;
+    border:1px solid #123333;
+    cursor:pointer;
+    background-color: lightgrey
+}
+.eraser:hover
+{
+    background-color: grey
+}
+
+    </style> 
+</head> 
+<body>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+<script src="/js/myutil.js"></script>
+<script src="/js/jquery.translate-1.3.9.js"></script>
+<script src="/js/json2.js"></script>
+<script>
+
+var fromLanguage = ""
+var toLanguage = ""
+var entryWord = ""
+var translatedWord = ""
+
+function displayEntry(entry) {
+    var screen = $('#entryScreen').clone().css('display', 'block')
+    $('.buttons',screen).attr('id','buttons')
+    $('.buttons2',screen).attr('id','buttons2')
+    entryWord = entry.word;
+    var translated;
+    
+    $.translate( entryWord, 'en', toLanguage , {
+    complete: function(translation){
+                translated =  translation;
+                $('.word1', screen).css('color', 'black').css('font-size', '55px').text(translated);
+                //http://translate.google.com/translate_tts?tl='+toLanguage+'&q='+translated+'"
+                $('.audio', screen).html('<iframe src="http://translate.google.com/translate_tts?tl='+toLanguage+'&q='+translated+'"></iframe>');
+    }
+    });
+   
+    
+    // '<audio id="speech" src="http://translate.google.com/translate_tts?tl=en&q=hello" controls="controls" autoplay="autoplay">Your browser does not support the audio element.</audio>'
+       
+       
+     $('.showAnswer', screen).click(function () {
+         $.translate( entryWord, toLanguage , fromLanguage , {
+            complete: function(translation){
+                        //translated =  translation;
+                       // $('.word1', screen).css('color', 'black').css('font-size', '32px').text(translated +' = '+translation);
+                        $('.result', screen).css('color', 'black').css('font-size', '32px').text(' = '+translation);
+                        //http://translate.google.com/translate_tts?tl='+toLanguage+'&q='+translated+'"                       
+            }
+            });
+            
+            $('#buttons2', screen).css('display','block');
+            $('#buttons', screen).css('display','none');
+       
+    }) 
+       
+    $('.submitEntry', screen).click(function () {
+            var selectedFromLanguage = fromLanguage;
+            var selectedToLanguage = toLanguage;
+                
+        $.ajax({
+            url : "/api/submitResult",
+            type : 'post',
+            data : {
+                me : username,
+                entry : entry.key,
+                result : '1'
+            },
+            success : function (s) {
+                //displayMain()
+            }
+        })
+        
+         $.ajax({
+                    url : "/api/enterContest",
+                    data : {
+                        me : username,
+                        fromlanguage: selectedFromLanguage,
+                        tolanguage: selectedToLanguage
+                    },
+                    success : function (s) {
+                        o = JSON.parse(s)
+                        if (o) {
+                            if (o.word) {
+                                console.log(o)
+                                displayEntry(o)
+                            } else {
+                                
+                            }
+                        } else {
+                            alert('Sorry, there are no available competitions just now. You need to wait until some other people write some passages. Hopefully that will happen soon, but it could be an hour or more, if nobody else is online right now.')
+                        }
+                    }
+                })
+                
+    })
+    
+     $('.changeLanguages', screen).click(function () {
+          
+                displayMain()
+        });
+        
+    
+     $('.submitEntryWrong', screen).click(function () {
+            var selectedFromLanguage = fromLanguage;
+            var selectedToLanguage = toLanguage;
+                
+        //alert (getDrawingText())
+        $.ajax({
+            url : "/api/submitResult",
+            type : 'post',
+            data : {
+                me : username,
+                entry : entry.key,
+                result : '0'
+            },
+            success : function (s) {
+                //displayMain()
+            }
+        })
+        
+         $.ajax({
+                    url : "/api/enterContest",
+                    data : {
+                        me : username,
+                        fromlanguage: selectedFromLanguage,
+                        tolanguage: selectedToLanguage
+                    },
+                    success : function (s) {
+                        o = JSON.parse(s)
+                        if (o) {
+                            if (o.word) {
+                                console.log(o)
+                                displayEntry(o)
+                            } else {
+                                
+                            }
+                        } else {
+                            alert('Sorry, there are no available competitions just now. You need to wait until some other people write some passages. Hopefully that will happen soon, but it could be an hour or more, if nobody else is online right now.')
+                        }
+                    }
+                })
+                
+    })
+    
+     $('.nextWord', screen).click(function () {
+        
+                var selectedFromLanguage = fromLanguage;
+                var selectedToLanguage = toLanguage;
+                
+                 $.ajax({
+                        url : "/api/submitResult",
+                        type : 'post',
+                        data : {
+                            me : username,
+                            entry : entry.key,
+                            result : '1'
+                        },
+                        success : function (s) {
+                           // displayMain()
+                        }
+                    })
+        
+        
+                $.ajax({
+                    url : "/api/enterContest",
+                    data : {
+                        me : username,
+                        fromlanguage: selectedFromLanguage,
+                        tolanguage: selectedToLanguage
+                    },
+                    success : function (s) {
+                        o = JSON.parse(s)
+                        if (o) {
+                            if (o.word) {
+                                console.log(o)
+                                displayEntry(o)
+                            } else {
+                                
+                            }
+                        } else {
+                            alert('Sorry, there are no available competitions just now. You need to wait until some other people write some passages. Hopefully that will happen soon, but it could be an hour or more, if nobody else is online right now.')
+                        }
+                    }
+                })
+          
+        });
+    
+    $('#content').empty().append(screen)
+
+}
+</script>
+    <div id="entryScreen" style="display:none;text-align:center;">
+        <span class="word1" style="position:relative;width:300px; height:40px;"></span> </br>
+        <span class="result" style="position:relative;font-size:25px; width:300px; height:35px;">&nbsp;</span> 
+        <div style="margin:20px" class="audio">
+        
+       
+           
+        </div>
+        <div class="buttons" style="margin:0 auto;width:225px;"><button class="showAnswer">See answer </button>
+        <button class="nextWord">Go to next word </button></div>
+        <div class="buttons2" style="margin:0 auto;width:225px;display:none">
+        <button class="submitEntryWrong">Got it wrong </button><button class="submitEntry">Got it right </button></div>
+        <button class="changeLanguages">Change Languages </button>
+    </div>
+    
+<script>
+
+function renderDiv(a) {
+    return $('<div></div>').append(a)
+}
+
+function displayMain(user) {  
+  
+    
+    $.ajax({
+        url : "/api/getUserInfo",
+        data : {
+            me : username,
+            user : (user ? user.key : undefined)
+        },
+        success : function (s) {
+            load(JSON.parse(s))
+        }
+    })
+    
+    function load(data) {
+        $('#header .username').click(function () {
+            displayMain(data.me)
+        })
+
+        function getUsername(u) {
+            return (u.key == data.me.key ? "me" : u.username) 
+        }
+     
+        
+        var screen = $('#mainScreen').clone().css('display', 'block')
+      
+        
+        
+       
+        $('.playButton', screen).click(function () {
+            fromLanguage = $('.fromLanguage', screen).val();
+            toLanguage = $('.toLanguage', screen).val();
+            $.ajax({
+                url : "/api/enterContest",
+                data : {
+                    me : username,
+                    fromlanguage: fromLanguage,
+                    tolanguage: toLanguage
+                },
+                success : function (s) {
+                    o = JSON.parse(s)
+                    if (o) {
+                        if (o.word) {
+                            console.log(o)
+                            displayEntry(o)
+                        } else {
+                            
+                        }
+                    } else {
+                        alert('Sorry, there are no available competitions just now. You need to wait until some other people write some passages. Hopefully that will happen soon, but it could be an hour or more, if nobody else is online right now.')
+                    }
+                }
+            })
+        })
+        //$('.mainUser', screen).text(getUsername(data.user))
+       
+       
+        var count = 1;
+
+       
+        $('#content').empty().append(screen)
+        count = 1;
+       
+    }
+}
+</script>
+    <div id="mainScreen" style="display:none">
+        <div style="width:210px;margin:0 auto;">
+            <div class="languageDiv"> 
+                Native Languange:
+                <select class="fromLanguage" style="width:202px;">
+                      <option value="en">English</option>
+                      <option value="fr">French</option>
+                      <option value="ro">Romanian</option>
+                      <option value="it">Italian</option>
+                      <option value="es">Spanish</option>
+                </select>
+                <br><br>
+                Language to learn:
+                <select class="toLanguage" style="width:202px;">
+                  <option value="en">English</option>
+                  <option value="fr">French</option>
+                  <option value="ro">Romanian</option>
+                  <option value="it">Italian</option>
+                  <option value="es">Spanish</option>
+                </select>
+            </div>
+            <br>
+            <div class="playButton" style="border:1px solid;width:200px;height:100px;border-radius:15px;-moz-border-radius:15px">
+                <table style="width:100%;height:100%">
+                    <tr><td align="center" valign="center"><span style="font-size:46px;cursor:pointer">Start</span></td></tr>
+                </table>
+            </div>
+            <div class="thisUser" style="margin-top:20px"></div>
+           
+        </div>
+       
+    </div>
+<script>
+
+
+function displayHeader() {
+    var screen = $('#headerScreen').clone().css('display', 'block')
+    
+    $('.username', screen).text(username)
+    if (logoutUrl) {
+        $('.logout', screen).attr("href", logoutUrl)
+    } else {
+        $('.logout', screen).remove()
+    }
+    
+    $('#header').empty().append(screen)
+}
+</script>
+    <div id="headerScreen" style="display:none;margin-bottom:20px">
+        <div style="float:right"><small><span class="username"></span>
+        <a class="logout" style="color:grey"><span>logout</span></a></small></div>
+        <div style="clear:both"></div>
+    </div>
+<script>
+
+
+$(function () {
+    $('body').ajaxError(function (_, s) {
+        var err = s.responseText
+        var m = err.match(/Exception: (.*)/)
+        if (m) {
+            err = m[1]
+        }
+        alert("error: " + err)
+    })
+    
+    username = getUrlParams()["me"] || {{username}}
+    logoutUrl = {{logoutUrl}}
+    
+    displayHeader()
+    displayMain()
+    
+    // testing stuff
+    if (false) {
+        entry = {
+            text : "hello hi howdy",
+            deadline : time() + (60 * 1000),
+            options : [
+                "WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW WWWW",
+                "iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii iiii"
+            ]
+        }
+        displayVote(entry)
+    }
+})
+
+</script>
+
+<div id="header">
+</div>
+<div style="width:100%">
+    <div id="content" style="width:400px;margin:auto">
+    </div>
+</div>
+
+</body>
+</html>

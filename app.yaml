@@ -1,0 +1,31 @@
+application: test2011blah
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+
+- url: /admin.*
+  script: admin.py
+  login: admin
+
+- url: /js
+  static_dir: js
+
+- url: /css
+  static_dir: css
+
+- url: /api/.*
+  script: api.py
+
+- url: /_api/.*
+  script: api.py
+  login: admin
+
+- url: /.*
+  script: main.py
+
+builtins:
+- datastore_admin: on
+- remote_api: on
+
